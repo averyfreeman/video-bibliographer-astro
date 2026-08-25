@@ -1,9 +1,12 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import node from '@astrojs/node';
 import starlight from '@astrojs/starlight';
 import d2 from 'astro-d2';
 
 export default defineConfig({
+  output: 'server',
+  adapter: node({ mode: 'standalone' }),
   site: 'http://localhost:5000',
   server: { host: '0.0.0.0', port: 4321 },
   integrations: [

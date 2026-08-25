@@ -1,0 +1,119 @@
+---
+interface Props {
+  /** Endpoint receiving the submitted URL. */
+  action?: string;
+}
+
+const { action = '/api/analyze' } = Astro.props;
+---
+
+<div class="vb-hero-form" aria-labelledby="analyze-heading">
+  <p class="eyebrow">YouTube → history</p>
+  <h2 id="analyze-heading">Drop in a video. Follow the trail.</h2>
+  <p>Paste a public YouTube URL to retrieve its transcript and identify historical references.</p>
+  <form action={action} method="post" data-video-analysis-form>
+    <label for="video-url">YouTube video URL</label>
+    <div class="vb-form-row">
+      <input id="video-url" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://www.youtube.com/watch?v=t38LbMVoPCs&t=1674s" aria-describedby="video-url-help" required />
+      <button class="sl-link-button primary" type="submit">Analyze video</button>
+    </div>
+  </form>
+  <p id="video-url-help" class="vb-help">Accepts copied YouTube watch, youtu.be, embed, shorts, and live links, including query parameters such as <code>&amp;t=1674s</code>.</p>
+  <p class="vb-note" data-analysis-status role="status">The server retrieves the full timestamped transcript, analyzes bounded chunks, and saves a Markdown work product.</p>
+  <section class="vb-analysis-result" data-analysis-result aria-live="polite" hidden>
+    <h3 data-analysis-title></h3>
+    <p data-analysis-output></p>
+    <ol data-analysis-references></ol>
+  </section>
+</div>
+
+<script>
+  interface AnalysisReference {
+    timestamp: string;
+    subject: string;
+    quote: string;
+    confidence: number;
+    sourceUrl: string;
+    disclaimer?: string;
+  }
+
+  interface AnalysisSuccess {
+    status: 'complete';
+    title: string;
+    references: AnalysisReference[];
+    markdown: {
+      identifier: string;
+      path: string;
+    };
+  }
+
+  interface AnalysisFailure {
+    status: 'error';
+    message: string;
+  }
+
+  const form = document.querySelector<HTMLFormElement>('[data-video-analysis-form]');
+  const status = document.querySelector<HTMLElement>('[data-analysis-status]');
+  const result = document.querySelector<HTMLElement>('[data-analysis-result]');
+  const title = document.querySelector<HTMLElement>('[data-analysis-title]');
+  const output = document.querySelector<HTMLElement>('[data-analysis-output]');
+  const references = document.querySelector<HTMLOListElement>('[data-analysis-references]');
+
+  function isSuccess(value: unknown): value is AnalysisSuccess {
+    return typeof value === 'object' && value !== null && (value as { status?: unknown }).status === 'complete';
+  }
+
+  function isFailure(value: unknown): value is AnalysisFailure {
+    return typeof value === 'object' && value !== null && (value as { status?: unknown }).status === 'error';
+  }
+
+  function renderReference(reference: AnalysisReference): HTMLLIElement {
+    const item = document.createElement('li');
+    const heading = document.createElement('strong');
+    heading.textContent = `${reference.timestamp} — ${reference.subject}`;
+    item.append(heading);
+    const quote = document.createElement('p');
+    quote.textContent = `“${reference.quote}” · confidence ${reference.confidence.toFixed(2)}`;
+    item.append(quote);
+    const source = document.createElement('a');
+    source.href = reference.sourceUrl;
+    source.target = '_blank';
+    source.rel = 'noreferrer';
+    source.textContent = 'Open source';
+    item.append(source);
+    if (reference.disclaimer) {
+      const note = document.createElement('p');
+      note.textContent = `Uncertainty: ${reference.disclaimer}`;
+      item.append(note);
+    }
+    return item;
+  }
+
+  form?.addEventListener('submit', async (event: SubmitEvent): Promise<void> => {
+    event.preventDefault();
+    const input = form.elements.namedItem('url');
+    if (!(input instanceof HTMLInputElement) || !status || !result || !title || !output || !references) return;
+    status.textContent = 'Retrieving transcript and analyzing bounded chunks…';
+    result.hidden = true;
+    references.replaceChildren();
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({ url: input.value }),
+      });
+      const payload: unknown = await response.json();
+      if (!response.ok || !isSuccess(payload)) {
+        status.textContent = isFailure(payload) ? payload.message : 'The video could not be processed.';
+        return;
+      }
+      title.textContent = payload.title;
+      output.textContent = `Saved work product: ${payload.markdown.path}. Found ${payload.references.length} reference${payload.references.length === 1 ? '' : 's'}.`;
+      for (const reference of payload.references) references.append(renderReference(reference));
+      result.hidden = false;
+      status.textContent = 'Analysis complete.';
+    } catch {
+      status.textContent = 'The analysis request failed before a result was returned.';
+    }
+  });
+</script>

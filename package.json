@@ -15,7 +15,10 @@
     "analyze:youtube": "tsx scripts/analyze-youtube.ts"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.46",
+    "@astrojs/node": "^11.1.4",
     "@astrojs/starlight": "^0.41.8",
+    "ai": "^7.0.78",
     "astro": "^7.1.6",
     "astro-d2": "^0.13.1",
     "astro-og-canvas": "^0.13.0",

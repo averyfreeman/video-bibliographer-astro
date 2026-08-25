@@ -42,13 +42,13 @@
 - **Evidence required:** Unit tests plus one controlled live public-video smoke test or a documented provider limitation.
 - **Milestone:** Tag `0.4.0` only after evidence.
 
-## Objective 5 — Gemini bibliography analysis
+## Objective 5 — OpenAI bibliography analysis
 
 - **Status:** IN_PROGRESS
-- **Goal:** Convert a real retrieved transcript into schema-valid historical reference candidates using a Gemini Flash-class model.
+- **Goal:** Convert a real retrieved transcript into schema-valid historical reference candidates using a configured OpenAI model.
 - **Acceptance:** API key is server/runtime-only; model is verified as available; output includes timestamps, quote/reference, subject, confidence 0–1, source URL, context, max-two-paragraph significance, uncertainty, thumbnail metadata, and processing notes; malformed or fabricated-looking output is rejected or marked unverified.
-- **Evidence required:** Key-safe API smoke test, fake-provider tests, real public YouTube transcript run, structured validation output, and persisted work-product path.
-- **Milestone:** Tag `0.5.0` only after evidence.
+- **Evidence required:** Key-safe API smoke test, fake-provider tests, real public YouTube transcript run, structured validation output, and persisted work-product path. The live route now reaches transcript retrieval and OpenAI; current runtime evidence is blocked by OpenAI `HTTP 429 insufficient_quota` during generation.
+- **Milestone:** Tag `0.5.0` only after a real generation request returns validated bibliography output.
 
 ## Objective 6 — Exact Markdown work product persistence
 

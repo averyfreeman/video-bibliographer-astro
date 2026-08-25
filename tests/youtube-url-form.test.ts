@@ -24,14 +24,20 @@ describe('YouTube URL input', () => {
 
   it('keeps an accessible branded home entry point without starter copy', () => {
     const home = readFileSync(new URL('../src/content/docs/index.mdx', import.meta.url), 'utf8');
+    const form = readFileSync(new URL('../src/components/VideoUrlForm.astro', import.meta.url), 'utf8');
 
     expect(home).toContain('Video Bibliographer');
-    expect(home).toContain('id="video-url"');
-    expect(home).toContain('for="video-url"');
-    expect(home).toContain('name="url"');
-    expect(home).toContain('inputmode="url"');
-    expect(home).toContain('autocomplete="url"');
-    expect(home).toContain('Analyze video');
+    expect(home).toContain('<VideoUrlForm />');
+    expect(form).toContain('id="video-url"');
+    expect(form).toContain('for="video-url"');
+    expect(form).toContain('name="url"');
+    expect(form).toContain('inputmode="url"');
+    expect(form).toContain('autocomplete="url"');
+    expect(form).toContain("action = '/api/analyze'");
+    expect(form).toContain('method="post"');
+    expect(form).toContain("method: 'POST'");
+    expect(form).toContain("JSON.stringify({ url: input.value })");
+    expect(form).toContain('Analyze video');
     expect(home).not.toMatch(/Starlight starter|Welcome to your new Astro project|Edit this page/i);
   });
 

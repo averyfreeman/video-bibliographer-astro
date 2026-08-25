@@ -14,21 +14,9 @@ hero:
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
+import VideoUrlForm from '../../components/VideoUrlForm.astro';
 
-<div class="vb-hero-form" aria-labelledby="analyze-heading">
-  <p class="eyebrow">YouTube → history</p>
-  <h2 id="analyze-heading">Drop in a video. Follow the trail.</h2>
-  <p>Paste a public YouTube URL to begin. Transcript retrieval and AI analysis are the next layer; this first release keeps the boundary explicit instead of inventing an answer.</p>
-  <form action="/bibliographies/sample/" method="get">
-    <label for="video-url">YouTube video URL</label>
-    <div class="vb-form-row">
-      <input id="video-url" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://www.youtube.com/watch?v=t38LbMVoPCs&t=1674s" aria-describedby="video-url-help" required />
-      <button class="sl-link-button primary" type="submit">Analyze video</button>
-    </div>
-  </form>
-  <p id="video-url-help" class="vb-help">Accepts copied YouTube watch, youtu.be, embed, shorts, and live links, including query parameters such as <code>&amp;t=1674s</code>.</p>
-  <p class="vb-note" role="status">Current demo: browse the sample work product below. Live transcript processing is being connected server-side.</p>
-</div>
+<VideoUrlForm />
 
 ## What the work product contains
 
@@ -44,7 +32,7 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
   </Card>
 </CardGrid>
 
-> **Scope note:** A YouTube URL alone does not guarantee an accessible transcript. The future agent will report private, captionless, or unavailable videos honestly.
+> **Scope note:** A YouTube URL alone does not guarantee an accessible transcript. The server reports private, captionless, rate-limited, or unavailable videos honestly.
 
 ## Start with an example
 
