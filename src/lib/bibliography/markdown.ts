@@ -1,4 +1,4 @@
-import type { Bibliography } from './types';
+import type { Bibliography, MarkdownBibliographyReference } from './types';
 import { validateBibliography } from './analysis';
 
 /**
@@ -9,9 +9,9 @@ import { validateBibliography } from './analysis';
 export function renderBibliographyMarkdown(input: Bibliography): string {
   const bibliography = validateBibliography(input);
   const timeline = bibliography.references.length
-    ? bibliography.references.map((ref) => `| ${ref.timestamp} | ${ref.subject} | ${ref.confidence.toFixed(2)} |`).join('\n')
+    ? bibliography.references.map((ref) => `| ${ref.timestamp} | ${ref.timelineLabel} | ${ref.confidence.toFixed(2)} |`).join('\n')
     : '| — | No references identified | — |';
-  const citations = bibliography.references.map((ref) => [
+  const citations = bibliography.references.map((ref: MarkdownBibliographyReference) => [
     `## ${ref.timestamp} — ${ref.subject}`,
     '',
     `**Confidence:** ${ref.confidence.toFixed(2)}  `,
@@ -22,7 +22,8 @@ export function renderBibliographyMarkdown(input: Bibliography): string {
     '',
     ref.significance,
     ref.disclaimer ? `\n\n> **Uncertainty:** ${ref.disclaimer}` : '',
-    ref.thumbnailAlt ? `\n\n*Thumbnail: ${ref.thumbnailKind ?? 'illustrative'} — ${ref.thumbnailAlt}*` : '',
+    ref.thumbnail ? `\n\n*Thumbnail: ${ref.thumbnail.kind} — ${ref.thumbnail.alt} Provenance: ${ref.thumbnail.provenance}*` : '',
+    !ref.thumbnail && ref.thumbnailAlt ? `\n\n*Thumbnail: ${ref.thumbnailKind ?? 'illustrative'} — ${ref.thumbnailAlt}*` : '',
   ].join('\n')).join('\n\n');
   return [
     `# ${bibliography.videoTitle}`,

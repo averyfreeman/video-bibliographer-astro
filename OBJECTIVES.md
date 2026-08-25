@@ -28,7 +28,7 @@
 
 ## Objective 3 — Typed bibliography contract and TypeDoc
 
-- **Status:** IN_PROGRESS
+- **Status:** COMPLETE
 - **Goal:** Define the validated work-product model for references, confidence, sources, timestamps, context, synopsis, thumbnails, and processing notes.
 - **Acceptance:** Strict TypeScript/Zod schemas reject invalid confidence/timestamps/URLs and overlong synopses; public declarations have TSDoc; TypeDoc generates successfully; chronology is deterministic.
 - **Evidence required:** Focused Vitest tests, `pnpm check`, `pnpm typecheck`, and `pnpm typedoc` output.
@@ -102,7 +102,7 @@
 | --- | --- | --- | --- | --- |
 | 1 | COMPLETE | 2026-08-25 | `pnpm install --frozen-lockfile`; `pnpm test`; `pnpm check`; `pnpm typecheck`; `pnpm typedoc`; `pnpm build` | Hermes verified `SECRET_SCAN=PASS`, no tracked sensitive paths, `.env`/build/work-product ignores, source bibliography is not ignored, and `git diff --check` passed for the implementation files. `.dockerignore` added. |
 | 2 | COMPLETE | 2026-08-25 | `http://127.0.0.1:4321/`; `http://127.0.0.1:4321/bibliographies/sample/` | Hermes verified HTTP 200 for home/deep-link routes, rendered branding/form labels and no starter copy, and 14 Vitest tests including copied YouTube URL query-parameter cases, supported host/ID validation, and `0.0.0.0:4321` configuration. Native browser capture was attempted; typed browser setup was unavailable without an explicit driver-owned launch approval, so HTTP plus automated DOM-source checks are the recorded equivalent. |
-| 3 | IN_PROGRESS | — | — | Existing implementation has tests/TypeDoc; formal evidence record remains required. |
+| 3 | COMPLETE | 2026-08-25 | `pnpm test` (18 passed); `pnpm check`; `pnpm typecheck`; `pnpm typedoc` | Hermes verified strict Zod contract coverage for confidence/HTTP URLs/timestamps/synopsis/timeline labels/thumbnail metadata, deterministic chronology, Astro diagnostics with 0 errors, and TypeDoc output at `docs/api`. Remaining output is non-blocking dependency/API deprecation hints. |
 | 4 | IN_PROGRESS | — | — | `yt-dlp` path has passed a live CLI smoke test. |
 | 5 | IN_PROGRESS | — | — | Gemini generation has passed a live CLI smoke test. |
 | 6 | IN_PROGRESS | — | — | Existing output path must be verified against all retention requirements. |

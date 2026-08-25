@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true
+  },
+  "include": ["src/lib/bibliography/types.ts", "src/lib/bibliography/schema.ts"],
+  "exclude": ["dist", "docs/api", "tests"]
+}

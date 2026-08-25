@@ -1,11 +1,12 @@
 {
   "entryPoints": ["src/lib/bibliography/types.ts", "src/lib/bibliography/schema.ts"],
+  "tsconfig": "tsconfig.typedoc.json",
   "out": "docs/api",
   "plugin": [],
   "exclude": ["**/*.test.ts"],
   "excludePrivate": true,
   "cleanOutputDir": true,
   "treatWarningsAsErrors": true,
-  "skipErrorChecking": true,
+  "skipErrorChecking": false,
   "disableSources": true
 }
