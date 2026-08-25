@@ -14,7 +14,7 @@ export default defineConfig({
       routeMiddleware: './src/routeData.ts',
       customCss: ['./src/styles/global.css'],
       sidebar: [
-        { label: 'Start here', items: [{ label: 'Home', slug: '' }, { label: 'Methodology', slug: 'guides/methodology' }] },
+        { label: 'Start here', items: [{ label: 'Home', slug: '' }, { label: 'Methodology', slug: 'guides/methodology' }, { label: 'Architecture', slug: 'guides/architecture' }, { label: 'Kanban collaboration playbook', slug: 'guides/kanban-collaboration-playbook' }] },
         { label: 'Browse', items: [{ label: 'Sample work product', slug: 'bibliographies/sample' }] },
         { label: 'Reference', items: [{ label: 'Configuration', slug: 'reference/configuration' }] },
       ],

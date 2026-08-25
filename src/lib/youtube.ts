@@ -1,31 +1,60 @@
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import { classifyYouTubeTranscriptError, YouTubeTranscriptError } from './youtube/errors';
+import { createYtDlpTranscriptProvider } from './youtube/yt-dlp-provider';
+import type { TranscriptProvider } from './youtube/provider';
+import type { NormalizedYouTubeUrl, YouTubeTranscript } from './youtube/types';
 
-const execFileAsync = promisify(execFile);
 const YOUTUBE_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
-const YOUTUBE_HOSTS = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com']);
+const YOUTUBE_HOSTS = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be']);
 
 function validYouTubeId(candidate: string | null | undefined): string | null {
   if (!candidate) return null;
   return YOUTUBE_ID_PATTERN.test(candidate) ? candidate : null;
 }
 
-/** A transcript cue with its position in the source video. */
-export interface TranscriptCue {
-  /** Cue start in seconds. */
-  start: number;
-  /** Spoken text. */
-  text: string;
+export type { NormalizedYouTubeUrl, TranscriptCue, YouTubeTranscript } from './youtube/types';
+export { YouTubeTranscriptError } from './youtube/errors';
+export type { TranscriptProvider } from './youtube/provider';
+
+function parseStartTime(value: string | null): number | undefined {
+  if (!value) return undefined;
+  if (/^\d+(?:\.\d+)?$/.test(value)) return Number(value);
+  const match = value.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+(?:\.\d+)?)s)?$/i);
+  if (!match || !match[0]) return undefined;
+  const seconds = Number(match[1] ?? 0) * 3600 + Number(match[2] ?? 0) * 60 + Number(match[3] ?? 0);
+  return Number.isFinite(seconds) ? seconds : undefined;
 }
 
-/** The transcript and metadata returned for a YouTube URL. */
-export interface YouTubeTranscript {
-  /** Canonical source URL. */
-  videoUrl: string;
-  /** Video title reported by yt-dlp. */
-  title: string;
-  /** Ordered transcript cues. */
-  cues: TranscriptCue[];
+/**
+ * Normalizes supported YouTube URL forms without accepting arbitrary hosts.
+ * @param input User-provided URL.
+ * @returns A canonical video URL and optional start time, or `null` when unsupported.
+ */
+export function normalizeYouTubeUrl(input: string): NormalizedYouTubeUrl | null {
+  try {
+    const url = new URL(input.trim());
+    const hostname = url.hostname.toLowerCase();
+    if (url.protocol !== 'https:' || !YOUTUBE_HOSTS.has(hostname) || url.username || url.password || url.port) return null;
+
+    let videoId: string | null = null;
+    if (hostname === 'youtu.be') {
+      const segments = url.pathname.split('/').filter(Boolean);
+      videoId = segments.length === 1 ? validYouTubeId(segments[0]) : null;
+    } else if (url.pathname === '/watch' || url.pathname === '/') {
+      videoId = validYouTubeId(url.searchParams.get('v'));
+    } else {
+      const match = url.pathname.match(/^\/(?:embed|shorts|live)\/([^/?#]+)$/);
+      videoId = validYouTubeId(match?.[1]);
+    }
+    if (!videoId) return null;
+    const startSeconds = parseStartTime(url.searchParams.get('start') ?? url.searchParams.get('t'));
+    return {
+      videoId,
+      canonicalUrl: `https://www.youtube.com/watch?v=${videoId}`,
+      ...(startSeconds === undefined ? {} : { startSeconds }),
+    };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -34,44 +63,48 @@ export interface YouTubeTranscript {
  * @returns The video ID, or `null` for a non-YouTube URL.
  */
 export function extractYouTubeId(input: string): string | null {
-  try {
-    const url = new URL(input);
-    const hostname = url.hostname.toLowerCase();
-    if (hostname === 'youtu.be') return validYouTubeId(url.pathname.slice(1).split('/')[0]);
-    if (!YOUTUBE_HOSTS.has(hostname)) return null;
-
-    const watchId = validYouTubeId(url.searchParams.get('v'));
-    if (watchId) return watchId;
-
-    const pathId = url.pathname.match(/^\/(?:embed|shorts|live)\/([^/?#]+)/)?.[1];
-    return validYouTubeId(pathId);
-  } catch {
-    return null;
-  }
+  return normalizeYouTubeUrl(input)?.videoId ?? null;
 }
 
 /**
- * Retrieves captions using the locally installed yt-dlp executable.
+ * Retrieves timestamped captions through an injectable, bounded provider.
  * @param videoUrl Public YouTube URL.
+ * @param options Provider and timeout overrides for server-side execution.
  * @returns Transcript cues and title.
- * @throws Error when the URL is invalid or no captions are available.
+ * @throws YouTubeTranscriptError when the URL or provider cannot return honest cues.
  */
-export async function fetchYouTubeTranscript(videoUrl: string): Promise<YouTubeTranscript> {
-  const id = extractYouTubeId(videoUrl);
-  if (!id) throw new Error('Please provide a valid YouTube video URL.');
-  const url = `https://www.youtube.com/watch?v=${id}`;
-  const { stdout: metadata } = await execFileAsync('yt-dlp', ['--dump-single-json', '--skip-download', '--no-warnings', url], { maxBuffer: 10 * 1024 * 1024 });
-  const info = JSON.parse(metadata) as { title?: string; subtitles?: Record<string, Array<{ url: string; ext?: string }>>; automatic_captions?: Record<string, Array<{ url: string; ext?: string }>> };
-  const tracks = info.subtitles?.en ?? info.automatic_captions?.en ?? info.subtitles?.['en-US'] ?? info.automatic_captions?.['en-US'];
-  if (!tracks?.length) throw new Error('This video has no accessible English captions. Transcript API integration is required for other cases.');
-  const track = tracks.find((item) => item.ext === 'json3') ?? tracks[0];
-  const response = await fetch(track.url);
-  if (!response.ok) throw new Error(`Caption request failed with HTTP ${response.status}.`);
-  const payload = await response.json() as { events?: Array<{ tStartMs?: number; segs?: Array<{ utf8?: string }> }> };
-  const cues = (payload.events ?? []).flatMap((event) => {
-    const text = (event.segs ?? []).map((segment) => segment.utf8 ?? '').join('').replace(/\s+/g, ' ').trim();
-    return text ? [{ start: (event.tStartMs ?? 0) / 1000, text }] : [];
+export async function fetchYouTubeTranscript(
+  videoUrl: string,
+  options: { provider?: TranscriptProvider; timeoutMs?: number } = {},
+): Promise<YouTubeTranscript> {
+  const normalized = normalizeYouTubeUrl(videoUrl);
+  if (!normalized) throw new YouTubeTranscriptError('invalid-url', 'Please provide a valid public YouTube video URL.');
+  const provider = options.provider ?? createYtDlpTranscriptProvider({ timeoutMs: options.timeoutMs });
+  const controller = new AbortController();
+  const timeout = options.timeoutMs ?? 20_000;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      controller.abort();
+      reject(new YouTubeTranscriptError('timeout', 'The transcript provider timed out.'));
+    }, timeout);
   });
-  if (!cues.length) throw new Error('Caption track was empty.');
-  return { videoUrl: url, title: info.title ?? `YouTube video ${id}`, cues };
+  try {
+    const result = await Promise.race([
+      provider.getTranscript({ videoId: normalized.videoId, signal: controller.signal }),
+      timeoutPromise,
+    ]);
+    if (!result.cues.length) throw new YouTubeTranscriptError('empty-track', 'The transcript track was empty.');
+    return {
+      videoUrl: normalized.canonicalUrl,
+      title: result.title?.trim() || `YouTube video ${normalized.videoId}`,
+      language: result.language,
+      source: result.source,
+      cues: result.cues,
+    };
+  } catch (error) {
+    throw classifyYouTubeTranscriptError(error);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
 }

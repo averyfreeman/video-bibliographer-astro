@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fetchYouTubeTranscript } from '../src/lib/youtube';
+import { YouTubeTranscriptError } from '../src/lib/youtube/errors';
 import { analyzeWithGemini } from '../src/lib/gemini';
 import { renderBibliographyMarkdown, workProductName } from '../src/lib/bibliography/markdown';
 
@@ -33,7 +34,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     analyzeYouTube(videoUrl)
       .then((outputFile) => console.log(`Work product saved: ${outputFile}`))
       .catch((error: unknown) => {
-        console.error(error instanceof Error ? error.message : 'Analysis failed.');
+        if (error instanceof YouTubeTranscriptError) {
+          console.error(`[${error.code}] ${error.message}`);
+        } else {
+          console.error(error instanceof Error ? error.message : 'Analysis failed.');
+        }
         process.exitCode = 1;
       });
   }

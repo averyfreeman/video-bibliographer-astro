@@ -36,7 +36,7 @@
 
 ## Objective 4 — YouTube transcript acquisition
 
-- **Status:** IN_PROGRESS
+- **Status:** COMPLETE
 - **Goal:** Accept a valid public YouTube URL and retrieve timestamped transcript cues server-side, or provide an honest unavailable/error result.
 - **Acceptance:** Standard watch, short, embed, shorts/live forms are normalized safely; start-time query parameters are accepted; arbitrary URLs are rejected; transcript retrieval is bounded and server-side; private, captionless, rate-limited, and unsupported cases are classified without fabricated text.
 - **Evidence required:** Unit tests plus one controlled live public-video smoke test or a documented provider limitation.
@@ -103,7 +103,7 @@
 | 1 | COMPLETE | 2026-08-25 | `pnpm install --frozen-lockfile`; `pnpm test`; `pnpm check`; `pnpm typecheck`; `pnpm typedoc`; `pnpm build` | Hermes verified `SECRET_SCAN=PASS`, no tracked sensitive paths, `.env`/build/work-product ignores, source bibliography is not ignored, and `git diff --check` passed for the implementation files. `.dockerignore` added. |
 | 2 | COMPLETE | 2026-08-25 | `http://127.0.0.1:4321/`; `http://127.0.0.1:4321/bibliographies/sample/` | Hermes verified HTTP 200 for home/deep-link routes, rendered branding/form labels and no starter copy, and 14 Vitest tests including copied YouTube URL query-parameter cases, supported host/ID validation, and `0.0.0.0:4321` configuration. Native browser capture was attempted; typed browser setup was unavailable without an explicit driver-owned launch approval, so HTTP plus automated DOM-source checks are the recorded equivalent. |
 | 3 | COMPLETE | 2026-08-25 | `pnpm test` (18 passed); `pnpm check`; `pnpm typecheck`; `pnpm typedoc` | Hermes verified strict Zod contract coverage for confidence/HTTP URLs/timestamps/synopsis/timeline labels/thumbnail metadata, deterministic chronology, Astro diagnostics with 0 errors, and TypeDoc output at `docs/api`. Remaining output is non-blocking dependency/API deprecation hints. |
-| 4 | IN_PROGRESS | — | — | `yt-dlp` path has passed a live CLI smoke test. |
+| 4 | COMPLETE | 2026-08-25 | `pnpm exec vitest run tests/youtube/provider.test.ts` (11 passed); `pnpm test` (29 passed); `pnpm check`; `pnpm typecheck`; `pnpm typedoc`; `pnpm build`; `pnpm tsx -e` live smoke for `https://www.youtube.com/watch?v=t38LbMVoPCs&t=12s` | Hermes independently verified safe normalization of watch/short/embed/shorts/live URLs and start times; rejection of playlist-only, deceptive-host, credentialed, and custom-port URLs; validated-ID-only provider execution with `--no-playlist` and bounded timeout/metadata/caption sizes; typed private/captionless/rate-limit/timeout/unsupported/empty-track failures; unsafe caption-host rejection; and a real automatic-English transcript containing 3,093 non-empty, finite, nonnegative, monotonic timestamped cues. Provider uses unofficial `yt-dlp`/YouTube caption endpoints and may be blocked or change upstream. |
 | 5 | IN_PROGRESS | — | — | Gemini generation has passed a live CLI smoke test. |
 | 6 | IN_PROGRESS | — | — | Existing output path must be verified against all retention requirements. |
 | 7 | NOT_STARTED | — | — | — |
