@@ -101,7 +101,7 @@
 | Objective | Status | Hermes verification date | Evidence/link | Notes |
 | --- | --- | --- | --- | --- |
 | 1 | COMPLETE | 2026-08-25 | `pnpm install --frozen-lockfile`; `pnpm test`; `pnpm check`; `pnpm typecheck`; `pnpm typedoc`; `pnpm build` | Hermes verified `SECRET_SCAN=PASS`, no tracked sensitive paths, `.env`/build/work-product ignores, source bibliography is not ignored, and `git diff --check` passed for the implementation files. `.dockerignore` added. |
-| 2 | IN_PROGRESS | — | `http://localhost:4321/` | Shell and URL regression work exists; browser verification remains required. |
+| 2 | COMPLETE | 2026-08-25 | `http://127.0.0.1:4321/`; `http://127.0.0.1:4321/bibliographies/sample/` | Hermes verified HTTP 200 for home/deep-link routes, rendered branding/form labels and no starter copy, and 14 Vitest tests including copied YouTube URL query-parameter cases, supported host/ID validation, and `0.0.0.0:4321` configuration. Native browser capture was attempted; typed browser setup was unavailable without an explicit driver-owned launch approval, so HTTP plus automated DOM-source checks are the recorded equivalent. |
 | 3 | IN_PROGRESS | — | — | Existing implementation has tests/TypeDoc; formal evidence record remains required. |
 | 4 | IN_PROGRESS | — | — | `yt-dlp` path has passed a live CLI smoke test. |
 | 5 | IN_PROGRESS | — | — | Gemini generation has passed a live CLI smoke test. |
