@@ -2,6 +2,13 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
+const YOUTUBE_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
+const YOUTUBE_HOSTS = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com']);
+
+function validYouTubeId(candidate: string | null | undefined): string | null {
+  if (!candidate) return null;
+  return YOUTUBE_ID_PATTERN.test(candidate) ? candidate : null;
+}
 
 /** A transcript cue with its position in the source video. */
 export interface TranscriptCue {
@@ -29,9 +36,15 @@ export interface YouTubeTranscript {
 export function extractYouTubeId(input: string): string | null {
   try {
     const url = new URL(input);
-    if (url.hostname === 'youtu.be') return url.pathname.slice(1).split('/')[0] || null;
-    if (url.hostname.endsWith('youtube.com')) return url.searchParams.get('v') ?? url.pathname.match(/\/embed\/([^/]+)/)?.[1] ?? null;
-    return null;
+    const hostname = url.hostname.toLowerCase();
+    if (hostname === 'youtu.be') return validYouTubeId(url.pathname.slice(1).split('/')[0]);
+    if (!YOUTUBE_HOSTS.has(hostname)) return null;
+
+    const watchId = validYouTubeId(url.searchParams.get('v'));
+    if (watchId) return watchId;
+
+    const pathId = url.pathname.match(/^\/(?:embed|shorts|live)\/([^/?#]+)/)?.[1];
+    return validYouTubeId(pathId);
   } catch {
     return null;
   }

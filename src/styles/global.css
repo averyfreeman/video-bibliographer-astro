@@ -34,6 +34,7 @@ body {
 .vb-form-row input::placeholder { color: var(--sl-color-gray-3); }
 .vb-form-row button { min-height: 2.75rem; border-radius: .5rem; padding: .65rem 1rem; background: var(--sl-color-accent); color: var(--sl-color-black); font-weight: 700; border: 0; cursor: pointer; }
 .vb-form-row button:hover { background: var(--sl-color-accent-high); }
+.vb-help { font-size: .9rem; color: var(--sl-color-gray-2); }
 .vb-note { font-size: .9rem; color: var(--sl-color-gray-2); }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -69,3 +70,12 @@ body {
 [data-theme='dark'] .sl-markdown-content th { color: var(--sl-color-white); }
 [data-theme='dark'] .sl-markdown-content code { color: var(--sl-color-white); background: var(--sl-color-gray-6); }
 [data-theme='dark'] .sl-markdown-content strong { color: var(--sl-color-white); }
+[data-theme='dark'] .main-pane,
+[data-theme='dark'] .content-panel,
+[data-theme='dark'] .sl-markdown-content {
+  background: var(--sl-color-bg);
+}
+
+[data-theme='dark'] .vb-hero-form {
+  background: var(--sl-color-bg-sidebar);
+}

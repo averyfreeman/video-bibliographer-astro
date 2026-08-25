@@ -5,7 +5,7 @@ import d2 from 'astro-d2';
 
 export default defineConfig({
   site: 'http://localhost:5000',
-  server: { host: true },
+  server: { host: '0.0.0.0', port: 4321 },
   integrations: [
     d2({ experimental: { useD2js: true } }),
     starlight({
