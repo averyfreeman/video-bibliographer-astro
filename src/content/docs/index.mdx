@@ -1,40 +1,50 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
-template: splash # Remove or comment out this line to display the site sidebar on this page.
+title: Video Bibliographer
+description: Find the historical references hiding inside spoken video.
+template: splash
 hero:
-  tagline: Congrats on setting up a new Starlight project!
-  image:
-    file: ../../assets/houston.webp
+  tagline: A lively research workbench for quotes, people, and events.
   actions:
-    - text: Example Guide
-      link: /guides/example/
+    - text: Browse a sample work product
+      link: /bibliographies/sample/
       icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
-      icon: external
-      variant: minimal
+    - text: Read the methodology
+      link: /guides/methodology/
+      icon: open-book
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+<div class="vb-hero-form" aria-labelledby="analyze-heading">
+  <p class="eyebrow">YouTube → history</p>
+  <h2 id="analyze-heading">Drop in a video. Follow the trail.</h2>
+  <p>Paste a public YouTube URL to begin. Transcript retrieval and AI analysis are the next layer; this first release keeps the boundary explicit instead of inventing an answer.</p>
+  <form action="/bibliographies/sample/" method="get">
+    <label for="video-url">YouTube video URL</label>
+    <div class="vb-form-row">
+      <input id="video-url" name="url" type="url" placeholder="https://www.youtube.com/watch?v=…" required />
+      <button class="sl-link-button primary" type="submit">Analyze video</button>
+    </div>
+  </form>
+  <p class="vb-note" role="status">Current demo: browse the sample work product below. Live transcript processing is being connected server-side.</p>
+</div>
+
+## What the work product contains
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
+  <Card title="Timeline first" icon="magnifying-glass">
+    References appear in the order they were spoken, with timestamps and a visual overview.
+  </Card>
+  <Card title="Evidence, not vibes" icon="document">
+    Every candidate carries a confidence score, source URL, context, and an uncertainty note when needed.
+  </Card>
+  <Card title="Images with a point" icon="image">
+    Use archival material when it helps; use an explicitly labeled reconstruction when imagination explains the history better.
+  </Card>
 </CardGrid>
+
+> **Scope note:** A YouTube URL alone does not guarantee an accessible transcript. The future agent will report private, captionless, or unavailable videos honestly.
+
+## Start with an example
+
+The [sample work product](/bibliographies/sample/) shows the intended output format using clearly labeled fixture data—not a claim that a real video has already been processed.

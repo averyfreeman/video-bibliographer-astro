@@ -1,0 +1,33 @@
+services:
+  video-bibliographer:
+    build: .
+    container_name: video_bibliographer
+    restart: always
+    ports:
+      - "80:8080" # Maps host 8080 to container 8080
+      - "443:8443" # For SSL later
+    volumes:
+      # Shared volume for Certbot to place the ACME challenge file
+      - web-root:/usr/share/nginx/html/.well-known/acme-challenge
+      # Volume where Certbot saves the generated certificates
+      - certbot-certs:/etc/letsencrypt
+    networks:
+      - webnet
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - web-root:/var/www/html/.well-known/acme-challenge
+      - certbot-certs:/etc/letsencrypt
+    depends_on:
+      - video-bibliographer
+    # The command requests a cert using the webroot plugin, requiring NGINX to serve the challenge
+    command: certonly --webroot --webroot-path=/var/www/html --email averfreemany@gmail.com --agree-tos --no-eff-email -d averyfreeman.com
+
+volumes:
+  web-root:
+  certbot-certs:
+
+networks:
+  webnet:

@@ -1,0 +1,71 @@
+:root {
+  --vb-ink: #251d34;
+  --vb-plum: #6e3aa5;
+  --vb-gold: #f2b84b;
+  --vb-mint: #d8f3e6;
+}
+
+/* Keep the application layer aligned with Starlight's active color scheme. */
+:root[data-theme='dark'] {
+  --vb-ink: #f4f1ff;
+  --vb-plum: #c7a6ff;
+  --vb-gold: #ffd479;
+  --vb-mint: #193a36;
+}
+
+body {
+  background: var(--sl-color-bg);
+  color: var(--sl-color-text);
+}
+
+.vb-hero-form {
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  margin: 1rem 0 2rem;
+  background: var(--sl-color-bg-nav);
+  box-shadow: 0 1rem 3rem color-mix(in srgb, var(--sl-color-accent) 12%, transparent);
+}
+
+.vb-hero-form h2 { margin-top: 0.25rem; color: var(--sl-color-white); }
+.eyebrow { color: var(--vb-plum); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; font-size: .75rem; }
+.vb-form-row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: end; }
+.vb-form-row input { flex: 1 1 20rem; min-height: 2.75rem; border: 1px solid var(--sl-color-gray-4); border-radius: .5rem; padding: .65rem .8rem; background: var(--sl-color-bg); color: var(--sl-color-text); }
+.vb-form-row input::placeholder { color: var(--sl-color-gray-3); }
+.vb-form-row button { min-height: 2.75rem; border-radius: .5rem; padding: .65rem 1rem; background: var(--sl-color-accent); color: var(--sl-color-black); font-weight: 700; border: 0; cursor: pointer; }
+.vb-form-row button:hover { background: var(--sl-color-accent-high); }
+.vb-note { font-size: .9rem; color: var(--sl-color-gray-2); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .vb-hero-form { animation: vb-rise .5s ease-out both; }
+}
+
+@keyframes vb-rise {
+  from { opacity: 0; transform: translateY(.75rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) body { background: var(--sl-color-bg); color: var(--sl-color-text); }
+}
+
+[data-theme='dark'] .sl-markdown-content h1,
+[data-theme='dark'] .sl-markdown-content h2,
+[data-theme='dark'] .sl-markdown-content h3,
+[data-theme='dark'] .sl-markdown-content p,
+[data-theme='dark'] .sl-markdown-content li {
+  color: var(--sl-color-text);
+}
+
+[data-theme='dark'] .sl-markdown-content h1,
+[data-theme='dark'] .sl-markdown-content h2,
+[data-theme='dark'] .sl-markdown-content h3 {
+  color: var(--sl-color-white);
+}
+
+[data-theme='dark'] .sl-markdown-content a { color: var(--sl-color-accent-high); }
+[data-theme='dark'] .sl-markdown-content blockquote { border-inline-start-color: var(--sl-color-accent); color: var(--sl-color-gray-2); }
+[data-theme='dark'] .sl-markdown-content table { color: var(--sl-color-text); }
+[data-theme='dark'] .sl-markdown-content th { color: var(--sl-color-white); }
+[data-theme='dark'] .sl-markdown-content code { color: var(--sl-color-white); background: var(--sl-color-gray-6); }
+[data-theme='dark'] .sl-markdown-content strong { color: var(--sl-color-white); }

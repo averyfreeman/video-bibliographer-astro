@@ -1,26 +1,25 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import d2 from 'astro-d2';
 
-// https://astro.build/config
 export default defineConfig({
-	integrations: [
-		starlight({
-			title: 'My Docs',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
-			sidebar: [
-				{
-					label: 'Guides',
-					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
-					],
-				},
-				{
-					label: 'Reference',
-					items: [{ autogenerate: { directory: 'reference' } }],
-				},
-			],
-		}),
-	],
+  site: 'http://localhost:5000',
+  server: { host: true },
+  integrations: [
+    d2({ experimental: { useD2js: true } }),
+    starlight({
+      title: 'Video Bibliographer',
+      description: 'Trace the historical references hiding in spoken video.',
+      routeMiddleware: './src/routeData.ts',
+      customCss: ['./src/styles/global.css'],
+      sidebar: [
+        { label: 'Start here', items: [{ label: 'Home', slug: '' }, { label: 'Methodology', slug: 'guides/methodology' }] },
+        { label: 'Browse', items: [{ label: 'Sample work product', slug: 'bibliographies/sample' }] },
+        { label: 'Reference', items: [{ label: 'Configuration', slug: 'reference/configuration' }] },
+      ],
+    }),
+  ],
 });
+
+/** @typedef {import('astro').AstroConfig} AstroConfig */

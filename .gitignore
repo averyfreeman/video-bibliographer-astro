@@ -1,21 +1,36 @@
-# build output
-dist/
-# generated types
-.astro/
-
 # dependencies
 node_modules/
+.pnpm-store/
 
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# Astro/build output
+/dist/
+/.astro/
 
+# generated documentation and bibliography work products
+/docs/api/
+/bibliographies/
+/public/d2/
+.thumbs.db/
 
-# environment variables
+# secrets and certificates
 .env
-.env.production
+.env.*
+!.env.example
+/certbot-certs/
+*.pem
+*.key
+*.crt
 
-# macOS-specific files
+# logs and local state
+*.log
 .DS_Store
+playwright-report/
+test-results/
+
+# editor
+.vscode/
+.idea/
+
+# local agent artifacts
+.hermes/cache/
+.hermes/sessions/

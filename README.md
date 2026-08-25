@@ -1,49 +1,34 @@
-# Starlight Starter Kit: Basics
+# YouTube Video Bibliographer
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+An Astro Starlight workbench for tracing historical quotes, people, events, and ideas in spoken video.
 
-```
-pnpm create astro@latest -- --template starlight
-```
+## Development
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+This project uses pnpm:
 
-## 🚀 Project Structure
-
-Inside of your Astro + Starlight project, you'll see the following folders and files:
-
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
+```bash
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+The dev server binds to `0.0.0.0` and uses Astro’s default port `4321`, making it reachable from another device on the same tailnet at `http://<mac-tailnet-ip>:4321`. If that port is occupied, Astro chooses the next available port; check the terminal output.
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+Validation commands:
 
-Static assets, like favicons, can be placed in the `public/` directory.
+```bash
+pnpm check
+pnpm typecheck
+pnpm test
+pnpm typedoc
+pnpm build
+```
 
-## 🧞 Commands
+## Scope
 
-All commands are run from the root of the project, from a terminal:
+The current interface accepts YouTube URLs and presents a clearly labeled sample work product. Transcript retrieval, source verification, AI extraction, image generation, and Markdown persistence are being connected as server-side/agentic workflow components. A transcript copy/paste field is deferred.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+AI credentials belong in runtime environment variables only. Never use `PUBLIC_` variables for secrets or commit `.env` files.
 
-## 👀 Want to learn more?
+## Deployment
 
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+The static `dist/` site is intended for an unprivileged nginx container built and tested with Podman on the Oracle Linux aarch64 OCI host. The Mac does not require local Podman. See `.hermes/plans/` and `.hermes/NEXT_STEPS.md` for the deployment and deferred workflow notes.

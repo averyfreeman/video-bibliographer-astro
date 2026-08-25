@@ -1,0 +1,11 @@
+{
+  "entryPoints": ["src/lib/bibliography/types.ts", "src/lib/bibliography/schema.ts"],
+  "out": "docs/api",
+  "plugin": [],
+  "exclude": ["**/*.test.ts"],
+  "excludePrivate": true,
+  "cleanOutputDir": true,
+  "treatWarningsAsErrors": true,
+  "skipErrorChecking": true,
+  "disableSources": true
+}

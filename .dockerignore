@@ -1,0 +1,35 @@
+# Dependencies and package-manager caches
+node_modules/
+.pnpm-store/
+
+# Astro/build output and generated documentation
+dist/
+.astro/
+docs/api/
+public/d2/
+
+# Generated local bibliography work products
+bibliographies/
+
+# Secrets and certificates
+.env
+.env.*
+!.env.example
+certbot-certs/
+*.pem
+*.key
+*.crt
+
+# Logs, test output, and local state
+*.log
+.DS_Store
+playwright-report/
+test-results/
+.hermes/cache/
+.hermes/sessions/
+
+# VCS and editor metadata
+.git/
+.github/
+.vscode/
+.idea/
