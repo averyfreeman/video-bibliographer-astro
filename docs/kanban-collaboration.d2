@@ -1,0 +1,87 @@
+direction: right
+
+user: {
+  label: "User\nobjective + constraints"
+  style.fill: "#063e3b"
+  style.stroke: "#34d399"
+}
+
+orchestrator: {
+  label: "Hermes orchestrator\nplan + acceptance gate"
+  style.fill: "#063e3b"
+  style.stroke: "#34d399"
+}
+
+rules: {
+  label: "AGENTS.md\nOBJECTIVES.md\nactive plan"
+  style.fill: "#4c1d95"
+  style.stroke: "#a78bfa"
+}
+
+kanban: {
+  label: "Kanban\nclaims + dependencies + status"
+  style.fill: "#78350f"
+  style.stroke: "#fbbf24"
+}
+
+worker: {
+  label: "Cassius-Skidmax\nimplementation worker"
+  style.fill: "#083344"
+  style.stroke: "#22d3ee"
+}
+
+workspace: {
+  label: "Project workspace\nsource + tests + docs"
+  style.fill: "#083344"
+  style.stroke: "#22d3ee"
+}
+
+artifacts: {
+  label: "Evidence artifacts\ndiff · logs · reports · URLs"
+  style.fill: "#0f172a"
+  style.stroke: "#94a3b8"
+}
+
+verifier: {
+  label: "Hermes verifier\nindependent checks"
+  style.fill: "#063e3b"
+  style.stroke: "#34d399"
+}
+
+review: {
+  label: "Review decision\naccept or request changes"
+  style.fill: "#881337"
+  style.stroke: "#fb7185"
+}
+
+mcp: {
+  label: "Optional MCP observability\nread-only inspection"
+  style.fill: "#881337"
+  style.stroke: "#fb7185"
+}
+
+user -> orchestrator: "objective"
+orchestrator -> rules: "1. read context"
+rules -> kanban: "2. create bounded card"
+kanban -> worker: "3. atomic claim"
+worker -> workspace: "4. implement"
+workspace -> artifacts: "5. tests + artifacts"
+artifacts -> verifier: "6. inspect + rerun"
+verifier -> review: "7. evidence decision"
+review -> kanban: "8a. complete / reopen"
+review -> worker: "8b. repair request"
+worker -> artifacts: "9. revised evidence"
+artifacts -> verifier: "10. verify again"
+verifier -> orchestrator: "11. verified result"
+mcp -> artifacts: "observe"
+artifacts -> mcp: "read-only state"
+
+prototype: {
+  label: "Core tracer bullet\nYouTube -> chunks -> OpenAI -> Markdown"
+  style.fill: "#083344"
+  style.stroke: "#22d3ee"
+}
+
+orchestrator -> prototype: "prioritize"
+prototype -> workspace: "bounded implementation"
+artifacts -> prototype: "inspect intermediate work"

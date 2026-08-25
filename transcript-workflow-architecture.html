@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YouTube Transcript Processing Workflows</title>
+  <style>
+    :root { color-scheme: dark; --bg:#020617; --panel:#0f172a; --line:#334155; --text:#e2e8f0; --muted:#94a3b8; --cyan:#22d3ee; --green:#34d399; --amber:#fbbf24; --rose:#fb7185; --violet:#a78bfa; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:32px; background:var(--bg); color:var(--text); font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }
+    main { max-width:1200px; margin:auto; }
+    h1 { margin:0 0 8px; color:var(--cyan); font-size:24px; }
+    .intro { color:var(--muted); margin:0 0 26px; }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:18px; min-height:310px; }
+    .card.recommended { border-color:var(--green); box-shadow:0 0 0 1px rgba(52,211,153,.25); }
+    h2 { margin:0 0 12px; font-size:16px; }
+    h3 { margin:18px 0 6px; font-size:13px; color:var(--amber); }
+    p, li { color:var(--muted); }
+    ul { margin:8px 0 0; padding-left:20px; }
+    li { margin:6px 0; }
+    .flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:14px 0; }
+    .node { border:1px solid var(--cyan); border-radius:6px; padding:8px 10px; color:var(--text); background:rgba(8,51,68,.45); }
+    .node.backend { border-color:var(--green); background:rgba(6,78,59,.4); }
+    .node.model { border-color:var(--violet); background:rgba(76,29,149,.4); }
+    .node.observe { border-color:var(--rose); background:rgba(136,19,55,.35); }
+    .arrow { color:var(--amber); font-size:18px; }
+    .hybrid { margin-top:22px; border:1px solid var(--green); border-radius:8px; padding:20px; background:rgba(6,78,59,.16); }
+    .hybrid h2 { color:var(--green); }
+    .legend { margin-top:20px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); }
+    code { color:var(--amber); }
+    @media (max-width:850px) { body { padding:18px; } .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>YouTube Transcript Processing Workflows</h1>
+    <p class="intro">Transcript acquisition, model context, analysis, persistence, and observability are separate concerns.</p>
+
+    <section class="grid" aria-label="Three workflow options">
+      <article class="card">
+        <h2>Option 1: API + batch analysis</h2>
+        <div class="flow">
+          <span class="node">YouTube URL</span><span class="arrow">→</span>
+          <span class="node backend">Transcript REST/API</span><span class="arrow">→</span>
+          <span class="node">Normalize cues</span><span class="arrow">→</span>
+          <span class="node model">OpenAI</span>
+        </div>
+        <h3>What happens</h3>
+        <ul>
+          <li>Retrieve the transcript programmatically.</li>
+          <li>Send all text, or bounded chunks, to the model.</li>
+          <li>Validate and persist structured references.</li>
+        </ul>
+        <h3>Tradeoff</h3>
+        <p>Simple and deterministic. “Entire transcript in one context window” is optional, not required. Long videos should usually be chunked or summarized first.</p>
+      </article>
+
+      <article class="card">
+        <h2>Option 2: Model-driven MCP inspection</h2>
+        <div class="flow">
+          <span class="node">YouTube URL</span><span class="arrow">→</span>
+          <span class="node observe">Transcript MCP</span><span class="arrow">→</span>
+          <span class="node model">OpenAI</span>
+        </div>
+        <h3>What happens</h3>
+        <ul>
+          <li>The model calls tools such as get-transcript, list-segments, or search.</li>
+          <li>Data can arrive incrementally or by query.</li>
+          <li>Tool calls and intermediate results are observable.</li>
+        </ul>
+        <h3>Important correction</h3>
+        <p>MCP does not automatically prevent context growth. Tool results still enter model context unless the server paginates, searches, summarizes, or stores state externally.</p>
+      </article>
+
+      <article class="card">
+        <h2>Option 3: API pipeline + MCP observability</h2>
+        <div class="flow">
+          <span class="node">YouTube URL</span><span class="arrow">→</span>
+          <span class="node backend">Transcript API</span><span class="arrow">→</span>
+          <span class="node">Store/index</span><span class="arrow">→</span>
+          <span class="node model">OpenAI</span>
+        </div>
+        <div class="flow">
+          <span class="node observe">MCP audit tools</span><span class="arrow">↔</span>
+          <span class="node">Cues, chunks, references, logs</span>
+        </div>
+        <h3>What happens</h3>
+        <ul>
+          <li>The application owns the reliable batch workflow.</li>
+          <li>MCP exposes read-only inspection and re-check tools.</li>
+          <li>Humans or agents can inspect intermediate artifacts.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="hybrid">
+      <h2>Recommended architecture: hybrid, with API-first execution</h2>
+      <div class="flow">
+        <span class="node">Astro UI</span><span class="arrow">→</span>
+        <span class="node backend">Server/CLI orchestrator</span><span class="arrow">→</span>
+        <span class="node backend">Transcript provider</span><span class="arrow">→</span>
+        <span class="node">Cue store + chunk index</span><span class="arrow">→</span>
+        <span class="node model">OpenAI structured analysis</span><span class="arrow">→</span>
+        <span class="node">Validated Markdown</span>
+      </div>
+      <div class="flow">
+        <span class="node observe">Optional MCP server</span><span class="arrow">↔</span>
+        <span class="node">read cues / search chunks / inspect candidates / replay checks</span>
+      </div>
+      <p>Use the API/library path for production because it is easier to type, time out, test, retry, and persist. Use MCP as an optional operator and agent observability layer, not as the primary Astro request boundary.</p>
+    </section>
+
+    <div class="legend">
+      <strong>Context strategy:</strong> short transcript → one structured OpenAI request may be fine; long transcript → retrieve once, normalize, persist, chunk, analyze chunks, deduplicate references, then run a final synthesis pass. The MCP layer can inspect every stage without requiring the entire transcript to be loaded into one model call.
+    </div>
+  </main>
+</body>
+</html>
