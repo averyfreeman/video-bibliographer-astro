@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AnalysisError } from '../../src/lib/analysis/errors';
+import { BibliographyStorageError } from '../../src/lib/bibliography/storage';
 import { handleAnalyzeRequest } from '../../src/pages/api/analyze';
 import type { AnalyzeYouTubeResult } from '../../scripts/analyze-youtube';
 
@@ -94,5 +95,16 @@ describe('POST /api/analyze', () => {
     expect(response.status).toBe(502);
     expect(payload).toMatchObject({ status: 'error', code: 'provider' });
     expect(JSON.stringify(payload)).not.toContain('test-secret');
+  });
+
+  it('returns a conflict when exclusive work-product persistence finds an existing output', async () => {
+    const response = await handleAnalyzeRequest(request({ url: 'https://youtu.be/t38LbMVoPCs' }), {
+      analyze: async () => {
+        throw new BibliographyStorageError('output-exists', 'A work product with this generated name already exists; no existing Markdown was overwritten.');
+      },
+    });
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ status: 'error', code: 'output-exists', retryable: false });
   });
 });

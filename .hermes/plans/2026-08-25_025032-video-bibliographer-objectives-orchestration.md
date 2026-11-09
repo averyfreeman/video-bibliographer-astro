@@ -12,7 +12,7 @@
 
 ## Planning-only boundary
 
-This plan does not implement source changes, start Codex, commit, tag, publish, SSH, request certificates, or deploy. Execution begins only in a separate implementation turn. Public GitHub/Jules/Render work and OCI exposure require their objective-specific approval gates.
+This plan does not implement source changes, start Codex, commit, tag, publish, SSH, request certificates, or deploy. Execution begins only in a separate implementation turn. OCI exposure requires objective-specific approval.
 
 ## Reviewed inputs
 
@@ -43,7 +43,7 @@ This plan does not implement source changes, start Codex, commit, tag, publish, 
 - `d2` is not installed locally. Objective 7 must install/validate a compatible D2 integration or implement the explicitly permitted accessible typed fallback and document the incompatibility.
 - Podman is not installed locally. Objective 9 must use the designated OCI aarch64 Podman host as the authoritative container environment after read-only connectivity/preflight verification.
 - Objectives 5 and 8 require live provider access. Use server/runtime-only credentials and never inspect or print key values.
-- Objectives 10 and 11 require explicit authorization immediately before public deployment, certificate issuance, repository publication, Jules access, or Render deployment.
+- Objective 10 requires explicit authorization immediately before public deployment and/or certificate issuance.
 
 ## Orchestrator operating protocol
 
@@ -139,9 +139,9 @@ For every objective:
 
 **Independent verification:** real cues and timestamps are inspected when available; provider limitations are documented honestly; arbitrary URL fetching is impossible.
 
-### Objective 5: Gemini bibliography analysis (`0.5.0`)
+### Objective 5: OpenAI-compatible bibliography analysis (`0.5.0`)
 
-**Likely files:** provider-neutral analysis gateway/service/prompt/verification modules, `src/lib/gemini.ts`, analysis tests, CLI integration, environment documentation.
+**Likely files:** provider-neutral analysis gateway/service/prompt/verification modules, `src/lib/analysis/openai.ts`, analysis tests, CLI integration, environment documentation.
 
 **Steps:**
 1. Add fake-provider tests for structured success, malformed JSON, schema violations, unsupported model, HTTP errors, empty candidates, suspicious/fabricated-looking sources, uncertainty, and chronological sorting.
@@ -216,19 +216,6 @@ For every objective:
 
 **Independent verification:** public HTTP/HTTPS routes pass, restart survives, and exact evidence is recorded.
 
-### Objective 11: Deferred GitHub/Jules/Render workflow
-
-**Approval gate:** Ask for explicit authorization before public repository creation, push, Jules access changes, or Render deployment.
-
-**Steps:**
-1. Re-run tracked/staged/history secret scans and review the complete publication diff.
-2. Create/push `youtube-video-bibliographer` only after approval.
-3. Use the existing Jules MCP connector for a bounded independent review/test session; verify its outputs rather than self-certification.
-4. Authorize and verify Render deployment through the intended connector only when available.
-5. Record GitHub URL, Jules session/status, exact checks, and Render deployment ID/URL.
-
-**Independent verification:** fetch the public repository and deployed routes independently; do not claim completion from an agent report alone.
-
 ## Cross-objective test matrix
 
 Run the narrowest relevant checks after each objective and the full matrix at milestones:
@@ -260,7 +247,7 @@ Add and run Playwright once introduced. For CLI/integration work, use determinis
 - **Source authenticity:** A reachable URL is not proof of an original historical source. Preserve verification state and uncertainty.
 - **Unofficial transcript path:** `yt-dlp` can be rate-limited or blocked. Classify errors and document the provider limitation.
 - **D2 compatibility:** Installing D2 solely to satisfy appearance is a bad idea if the Starlight integration is incompatible. Use the accepted accessible fallback and record why.
-- **External side effects:** Certificates, public repositories, Jules/Render, and production deployment remain gated even though scaffolding exists.
+- **External side effects:** Certificates, public repositories, and production deployment remain gated even though scaffolding exists.
 
 ## Definition of done
 

@@ -16,10 +16,10 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.46",
-    "@astrojs/node": "^11.1.4",
-    "@astrojs/starlight": "^0.41.8",
+    "@astrojs/node": "^11.1.5",
+    "@astrojs/starlight": "^0.42.0",
     "ai": "^7.0.78",
-    "astro": "^7.1.6",
+    "astro": "^7.3.2",
     "astro-d2": "^0.13.1",
     "astro-og-canvas": "^0.13.0",
     "canvaskit-wasm": "^0.42.0",

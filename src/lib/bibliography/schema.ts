@@ -25,6 +25,7 @@ export const bibliographyReferenceSchema = z.object({
   timelineLabel: z.string().trim().min(1).max(96).optional(),
   confidence: z.number().finite().min(0).max(1),
   sourceUrl: httpUrlSchema,
+  sourceVerification: z.enum(['unverified', 'reachable', 'verified']).optional(),
   context: z.string().min(1),
   significance: z.string().min(1).refine((value) => value.trim().split(/\n\s*\n/).filter(Boolean).length <= 2, 'Synopsis must be at most two paragraphs'),
   thumbnail: bibliographyThumbnailSchema.optional(),

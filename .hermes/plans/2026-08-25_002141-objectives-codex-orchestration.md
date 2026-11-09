@@ -27,7 +27,6 @@ This turn is plan mode. Do not create or modify `OBJECTIVES.md`, `AGENTS.md`, so
 - Existing worktree is dirty. Codex must not reset, discard, or overwrite pre-existing changes without explicit direction.
 - `codex-acp` is available at `/Users/avery/.nix-profile/bin/codex-acp`. It must be invoked with a PTY through the approved Codex harness workflow.
 - Credentials exist under `$HOME/.secrets/MacClawd/`; Codex must not read, print, commit, or place them in client assets. Gemini is the preferred inexpensive model for the future workflow.
-- No GitHub publication, Jules/Render operation, or OCI deployment is part of objective implementation until the relevant objective is explicitly approved and its prerequisites are verified.
 
 ## Proposed `OBJECTIVES.md` content
 
@@ -125,13 +124,6 @@ The execution phase should create `OBJECTIVES.md` at the repository root with th
 - **Evidence required:** Redacted SSH preflight, HTTP/HTTPS curl or Playwright checks, certificate path/permission checks without printing private material.
 - **Milestone:** Tag `0.8.0` only after evidence.
 
-## Objective 11 — Deferred Jules/GitHub/Render workflow
-
-- **Status:** NOT_STARTED
-- **Goal:** Prepare a later public repository/review/deployment workflow managed through Jules.
-- **Acceptance:** After secret scanning and explicit approval, create public GitHub repository `youtube-video-bibliographer`, enable Jules access, have Jules run unit/Playwright/smoke/build checks, and have Jules deploy to Render through its MCP connection.
-- **Evidence required:** GitHub URL, Jules session/status, test outputs, Render deployment URL/ID; never claim completion from an unverified agent report.
-
 ## Objective completion log
 
 | Objective | Status | Hermes verification date | Evidence/link | Notes |
@@ -202,8 +194,8 @@ The orchestrator will independently run the relevant Playwright/browser smoke te
 
 ## Deployment boundaries
 
-- Do not SSH to OCI, publish GitHub, invoke Jules/Render, or expose a site publicly unless the orchestrator’s prompt explicitly authorizes that objective.
-- OCI container tests use Podman on the matching aarch64 host; local Docker/OrbStack is optional and secondary.
+- Ask user before invoking SSH to OCI or exposing site publicly and wait until orchestrator’s prompt explicitly authorizes that objective.
+- OCI container tests use Podman on the matching aarch64 host; local Docker is OrbStack and uses same architecture.
 - Never use container-side recursive chown as a shortcut for certificate permissions.
 ```
 

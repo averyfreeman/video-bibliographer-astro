@@ -181,7 +181,6 @@ Create `.hermes/NEXT_STEPS.md` during implementation with:
 - A server-side AI gateway boundary that keeps API keys out of static client assets.
 - Dynamic bibliography generation and durable storage options for OCI.
 - Thumbnail provenance and case-by-case fantasy reconstruction workflow.
-- The future Jules/GitHub/Render workflow: immediate `.gitignore`, public GitHub repo, enable Jules access, Jules unit/Playwright/smoke review, then Jules deployment to Render through its MCP connection.
 
 ## Validation commands
 
@@ -218,4 +217,4 @@ Plan updated for the dev-first OCI workflow and saved here. The next execution p
 
 Before SSH deployment, provide explicit authorization plus confirmation of the remote path, HTTP/HTTPS port arrangement, and whether to build remotely or transfer a locally built image.
 
-The local repository should be named `youtube-video-bibliographer`, with regular milestone commits and tags beginning at `0.1.0`. The deferred Jules/GitHub/Render workflow should be recorded in `.hermes/NEXT_STEPS.md` (or a reusable self-made skill when implementation begins), but should not be executed during this dev-first OCI phase.
+The local repository should be named `youtube-video-bibliographer`, with regular milestone commits and tags beginning at `0.1.0`.

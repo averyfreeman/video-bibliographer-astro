@@ -10,16 +10,15 @@ The first release accepts a YouTube URL only. Add one of these later:
 
 ## Dynamic analysis boundary
 
-The static Astro/nginx site must never contain Gemini, OpenAI, or OpenRouter keys. Future analysis should run in a server-side Astro endpoint, a separate worker, or a CLI agent. It should retrieve the transcript, call the AI gateway, verify sources, generate thumbnails, and persist the Markdown work product server-side.
+The static Astro/nginx site must never contain Gemini, OpenAI, or OpenRouter keys. The current `/api/analyze` server endpoint and CLI retrieve transcripts, call the configured OpenAI-compatible gateway, validate candidates, and persist Markdown server-side. Source verification and thumbnail generation remain explicit follow-up stages; URLs are not treated as proof of historical authenticity.
 
-## Future Jules/GitHub/Render workflow
+## GitHub workflow
 
 1. Protect the repository with `.gitignore` and secret scanning.
-2. Create the public `youtube-video-bibliographer` GitHub repository.
-3. Enable Jules repository access through its MCP integration.
-4. Ask Jules to run unit, Playwright, smoke, and production-build checks.
-5. Have Jules deploy to Render through its own MCP connection.
+2. Add changes to git tree using canonical versioning tags after every few code updates, whether major or minor.
+3. Commit changes to the public `youtube-video-bibliographer` GitHub repository.
+4. Update remote repo codebase updated (`git push`) after 3 turns max.
 
 ## Thumbnail provenance
 
-Choose case by case between archival/source images and generated illustrations. Clearly label reconstructions or fantasy scenes; preserve source or generation metadata with each citation.
+Create a 320x240 illustrative thumbnail of the scene described by each bibliographical ciation. Must be an easily recognizeable scene of historical relevance to the quote. Image quality of little importance.

@@ -49,7 +49,9 @@ const { action = '/api/analyze' } = Astro.props;
 
   interface AnalysisFailure {
     status: 'error';
+    code: string;
     message: string;
+    retryable: boolean;
   }
 
   const form = document.querySelector<HTMLFormElement>('[data-video-analysis-form]');
@@ -58,6 +60,16 @@ const { action = '/api/analyze' } = Astro.props;
   const title = document.querySelector<HTMLElement>('[data-analysis-title]');
   const output = document.querySelector<HTMLElement>('[data-analysis-output]');
   const references = document.querySelector<HTMLOListElement>('[data-analysis-references]');
+
+  const logPrefix = '[Video Bibliographer]';
+
+  function logStage(stage: string, details: Record<string, string | number | boolean>): void {
+    console.info(`${logPrefix} ${stage}`, details);
+  }
+
+  function logFailure(stage: string, details: Record<string, string | number | boolean>): void {
+    console.warn(`${logPrefix} ${stage}`, details);
+  }
 
   function isSuccess(value: unknown): value is AnalysisSuccess {
     return typeof value === 'object' && value !== null && (value as { status?: unknown }).status === 'complete';
@@ -92,27 +104,50 @@ const { action = '/api/analyze' } = Astro.props;
   form?.addEventListener('submit', async (event: SubmitEvent): Promise<void> => {
     event.preventDefault();
     const input = form.elements.namedItem('url');
-    if (!(input instanceof HTMLInputElement) || !status || !result || !title || !output || !references) return;
+    if (!(input instanceof HTMLInputElement) || !status || !result || !title || !output || !references) {
+      logFailure('submission-aborted', { reason: 'form-elements-unavailable' });
+      return;
+    }
+
+    let submittedUrl: URL;
+    try {
+      submittedUrl = new URL(input.value);
+    } catch {
+      logFailure('client-validation-failed', { reason: 'malformed-url' });
+      status.textContent = 'Provide a public YouTube video URL.';
+      return;
+    }
+    logStage('submit', { host: submittedUrl.hostname, protocol: submittedUrl.protocol, queryPresent: submittedUrl.search.length > 0 });
     status.textContent = 'Retrieving transcript and analyzing bounded chunks…';
     result.hidden = true;
     references.replaceChildren();
+    logStage('request-start', { method: 'POST', endpoint: form.action });
     try {
       const response = await fetch(form.action, {
         method: 'POST',
         headers: { 'content-type': 'application/json', accept: 'application/json' },
         body: JSON.stringify({ url: input.value }),
       });
+      logStage('response-received', { httpStatus: response.status, ok: response.ok });
       const payload: unknown = await response.json();
       if (!response.ok || !isSuccess(payload)) {
-        status.textContent = isFailure(payload) ? payload.message : 'The video could not be processed.';
+        if (isFailure(payload)) {
+          logFailure('analysis-failed', { code: payload.code, retryable: payload.retryable });
+          status.textContent = payload.message;
+        } else {
+          logFailure('analysis-failed', { code: 'unexpected-response', retryable: false });
+          status.textContent = 'The video could not be processed.';
+        }
         return;
       }
+      logStage('analysis-complete', { referenceCount: payload.references.length, titlePresent: payload.title.length > 0, markdownIdentifier: payload.markdown.identifier });
       title.textContent = payload.title;
       output.textContent = `Saved work product: ${payload.markdown.path}. Found ${payload.references.length} reference${payload.references.length === 1 ? '' : 's'}.`;
       for (const reference of payload.references) references.append(renderReference(reference));
       result.hidden = false;
       status.textContent = 'Analysis complete.';
-    } catch {
+    } catch (error: unknown) {
+      logFailure('request-failed', { errorType: error instanceof Error ? error.name : 'unknown' });
       status.textContent = 'The analysis request failed before a result was returned.';
     }
   });

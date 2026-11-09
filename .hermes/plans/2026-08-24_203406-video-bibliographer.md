@@ -16,7 +16,6 @@
 - The repository is an almost-unmodified Starlight starter with placeholder docs and an existing `src/content.config.ts`.
 - `PROJECT_OUTLINE.xml` is the product specification. It requires a video URL form, timeline ordered by video timestamp, confidence scores, source URLs, concise context, thumbnails, local Markdown output, and a timestamp/title-named output folder with `.thumbs.db`.
 - The first release accepts a YouTube URL only. Transcript API integration and a transcript copy/paste textarea are explicitly deferred to `.hermes/NEXT_STEPS.md`; the implementation must report unavailable/private/unsupported videos clearly rather than pretending to analyze unavailable audio.
-- Render deployment is deferred. Jules is the intended future reviewer/deployer through its configured MCP connection; no Render key should be read or used during this phase.
 - OCI deployment is the active deployment target: build the static `dist/` site into a lightweight nginx container and provide a Docker Compose scaffold with a server-local `.env` seam for a future API key. Because a static nginx container cannot execute the AI analysis API, the AI key must not be placed in the browser bundle; dynamic analysis remains a future backend/service concern.
 - The missing `@file:ai-sdk/openai` reference is treated as a package/provider hint, not a project file.
 - Thumbnail art is intentionally case-by-case: use source images, public-domain material, or generated/fantasy illustrations as appropriate, retaining attribution/provenance metadata when available and clearly labeling reconstructions as illustrative.
@@ -227,19 +226,9 @@ Also verify:
 - **Thumbnail licensing:** “Google Images” is not a license. Prefer generated illustrations, public-domain sources, or explicit attribution metadata.
 - **OCI persistence:** Static nginx cannot create dynamic bibliography files or execute AI analysis. Treat generated Markdown/thumbnails as build/local artifacts until a backend/object-storage design is selected.
 - **AI gateway choice:** Use the simplest OpenAI-compatible provider available in the current SDK ecosystem; keep it behind an interface so changing provider packages is a small follow-up.
-- **Deployment target:** OCI SSH deployment is now preferred. Jules/Render remains a later workflow for review and deployment automation.
+- **Deployment target:** OCI SSH deployment is the preferred after testing performed locally via orbstack, which uses the same standard Docker `docker compose` CLI syntax.
 
-## Deferred Jules/GitHub/Render workflow
-
-The user’s preferred future workflow is:
-
-1. Initialize and protect the repository immediately with a comprehensive `.gitignore` before any credentials or generated secrets can enter Git history.
-2. Create a public GitHub repository and push the project only after a secret scan and clean diff review.
-3. Enable/grant Jules access to that repository through the configured Jules MCP integration.
-4. Ask Jules to double-check the implementation, run unit tests, Playwright tests, smoke tests, and production build checks.
-5. Have Jules deploy to Render through its own MCP connection, keeping Render credentials outside this project and outside Hermes session output.
-
-This workflow should be saved as a reusable self-made skill or `POTENTIAL_NEXT_STEPS.md` during execution, not performed as part of the current OCI-focused plan. Jules should be treated as an independent reviewer/deployer, and claims of completion must be verified using repository, CI, deployment, or URL evidence.
+---
 
 ## Handoff
 
@@ -259,8 +248,7 @@ These questions affect implementation scope; they do not block the initial typed
 ## Implementation-ready notes
 
 - Use pnpm exclusively; update `pnpm-lock.yaml` through pnpm rather than hand-editing it.
-- Do not read, print, or commit `$HOME/.secrets/MacClawd/render-api-key`; Render/Jules deployment is deferred.
-- Do not attempt SSH or OCI deployment until the user supplies a hostname/IP, username, authentication method, remote path, and explicit deployment authorization.
+- Do not print, commit, push, or transfer in any other way, any secrets or files in the plaintext secrets repository folder `$HOME/.secrets/MacClawd`.
 - `PROJECT_OUTLINE.xml` remains the source specification; preserve its local-output naming and `.thumbs.db` requirements.
 - Every exported TypeScript declaration added by the implementation must have TSDoc so `pnpm typedoc` is clean.
 - Prefer small, reversible commits after each task.

@@ -1,5 +1,5 @@
 import { createOpenAI } from '@ai-sdk/openai';
-import { generateText, Output } from 'ai';
+import { generateText } from 'ai';
 import type { LanguageModel } from 'ai';
 import type { BibliographyReference } from '../bibliography/types';
 import { analysisChunkResultSchema } from './schema';
@@ -9,8 +9,10 @@ import type { AnalysisChunkRequest, AnalysisChunkResult, BibliographyAnalysisPro
 export { AnalysisError } from './errors';
 
 const DEFAULT_MODEL = 'gpt-4o-mini';
+const LOCAL_PROXY_KEY = 'hermes-local-proxy';
 
-type OpenAIEnvironment = {
+/** Server-side environment values used to configure OpenAI analysis. */
+export type OpenAIEnvironment = {
   OPENAI_API_KEY?: string;
   OPENAI_MODEL?: string;
   OPENAI_BASE_URL?: string;
@@ -36,11 +38,12 @@ export type OpenAIObjectGenerator = (options: {
 
 /** Loads OpenAI settings from the server process environment. */
 export function loadOpenAIAnalysisConfig(env: OpenAIEnvironment = process.env): OpenAIAnalysisConfig {
-  const apiKey = env.OPENAI_API_KEY?.trim();
+  const baseURL = env.OPENAI_BASE_URL?.trim() || undefined;
+  const isLocalProxy = baseURL?.startsWith('http://127.0.0.1:') || baseURL?.startsWith('http://localhost:');
+  const apiKey = isLocalProxy ? LOCAL_PROXY_KEY : env.OPENAI_API_KEY?.trim();
   if (!apiKey) throw new AnalysisError('missing-key', 'OpenAI analysis is not configured on the server.');
   const model = env.OPENAI_MODEL?.trim() || DEFAULT_MODEL;
   if (!model) throw new AnalysisError('invalid-config', 'OpenAI analysis model configuration is invalid.');
-  const baseURL = env.OPENAI_BASE_URL?.trim() || undefined;
   return { apiKey, model, ...(baseURL ? { baseURL } : {}) };
 }
 
@@ -48,9 +51,14 @@ function buildPrompt(request: AnalysisChunkRequest): string {
   return [
     'You are a meticulous historical bibliographer.',
     'Identify every plausible historical quote, person, event, work, or idea in this transcript chunk.',
-    'Return only the requested structured object. Do not invent sources; use a disclaimer when uncertain.',
+    'Return only JSON with exactly these top-level keys: candidates and notes.',
+    'Each candidate must use exactly these keys: id, timestampSeconds, timestamp, quote, subject, confidence, sourceUrl, sourceVerification, context, significance, disclaimer.',
+    'Do not use candidate, type, sources, or any other key. Use an empty candidates array when no reference is present.',
+    'The quote must be copied verbatim from the transcript chunk; confidence is a number from 0 to 1; sourceUrl is one http(s) URL; sourceVerification must be unverified unless evidence was actually checked; disclaimer is a string when uncertain.',
     'Use integer timestampSeconds matching a cue and a matching M:SS or H:MM:SS timestamp.',
     'Keep significance to at most two paragraphs and use http(s) source URLs.',
+    'Example valid empty response: {"candidates":[],"notes":["No historical references identified in this chunk."]}.',
+    'Example valid candidate keys: {"id":"chunk-0-reference-0","timestampSeconds":12,"timestamp":"0:12","quote":"verbatim transcript wording","subject":"historical subject","confidence":0.5,"sourceUrl":"https://example.org/source","sourceVerification":"unverified","context":"why it appears in the chunk","significance":"why it matters","disclaimer":"Needs verification"}.',
     `VIDEO URL: ${request.videoUrl}`,
     `VIDEO TITLE: ${request.videoTitle}`,
     `CHUNK INDEX: ${request.chunk.index}`,
@@ -68,16 +76,18 @@ async function defaultObjectGenerator(options: {
 }): Promise<{ object: unknown; modelId?: string }> {
   const result = await generateText({
     model: options.model,
-    output: Output.object({
-      schema: options.schema,
-      name: 'historical_bibliography_chunk',
-      description: 'Historical references found in one bounded transcript chunk.',
-    }),
-    prompt: options.prompt,
+    prompt: `${options.prompt}\nReturn only valid JSON matching this shape: {"candidates":[],"notes":[]}. Do not use Markdown fences.`,
     abortSignal: options.abortSignal,
     maxRetries: 0,
   });
-  return { object: result.output, modelId: result.finalStep.response.modelId };
+  const text = result.text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+  let object: unknown;
+  try {
+    object = JSON.parse(text) as unknown;
+  } catch (error) {
+    throw new AnalysisError('malformed-output', 'OpenAI returned malformed JSON output.', error);
+  }
+  return { object, modelId: result.response.modelId };
 }
 
 /** A typed OpenAI structured-output provider for bibliography chunks. */
@@ -98,7 +108,7 @@ export class OpenAIBibliographyAnalysisProvider implements BibliographyAnalysisP
       apiKey: config.apiKey,
       ...(config.baseURL ? { baseURL: config.baseURL } : {}),
     });
-    this.languageModel = client.responses(config.model);
+    this.languageModel = client.chat(config.model);
     this.generate = generator ?? defaultObjectGenerator;
   }
 
@@ -130,6 +140,7 @@ export class OpenAIBibliographyAnalysisProvider implements BibliographyAnalysisP
     return {
       candidates: parsed.data.candidates.map((candidate: BibliographyReference) => ({
         ...candidate,
+        sourceVerification: candidate.sourceVerification ?? 'unverified',
         ...(candidate.confidence < 0.75 && !candidate.disclaimer?.trim()
           ? { disclaimer: 'This identification is uncertain and should be independently verified against the source.' }
           : {}),

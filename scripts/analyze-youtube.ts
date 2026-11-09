@@ -1,12 +1,13 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { fetchYouTubeTranscript } from '../src/lib/youtube';
 import { YouTubeTranscriptError } from '../src/lib/youtube/errors';
 import { renderBibliographyMarkdown, workProductName } from '../src/lib/bibliography/markdown';
+import { persistBibliographyMarkdown } from '../src/lib/bibliography/storage';
 import { validateBibliography } from '../src/lib/bibliography/analysis';
 import { aggregateAnalysisCandidates, aggregateAnalysisNotes } from '../src/lib/analysis/aggregate';
 import { chunkTranscriptCues } from '../src/lib/analysis/chunks';
 import { createOpenAIBibliographyAnalysisProvider } from '../src/lib/analysis/openai';
+import type { OpenAIEnvironment } from '../src/lib/analysis/openai';
 import type { MarkdownBibliography } from '../src/lib/bibliography/types';
 import type { BibliographyAnalysisProvider } from '../src/lib/analysis/types';
 import type { TranscriptProvider } from '../src/lib/youtube/provider';
@@ -25,6 +26,8 @@ export interface AnalyzeYouTubeOptions {
   outputRoot?: string;
   /** Clock override for deterministic output names and metadata. */
   now?: Date;
+  /** Server-only OpenAI environment override. */
+  analysisEnv?: OpenAIEnvironment;
 }
 
 /**
@@ -55,7 +58,7 @@ export async function analyzeYouTubeDetailed(videoUrl: string, options: AnalyzeY
     timeoutMs: options.timeoutMs,
   });
   const chunks = chunkTranscriptCues(transcript.cues, options.chunkOptions);
-  const analysisProvider = options.analysisProvider ?? createOpenAIBibliographyAnalysisProvider();
+  const analysisProvider = options.analysisProvider ?? createOpenAIBibliographyAnalysisProvider({ env: options.analysisEnv });
   const results = [];
   for (const chunk of chunks) {
     results.push(await analysisProvider.analyzeChunk({
@@ -85,10 +88,7 @@ export async function analyzeYouTubeDetailed(videoUrl: string, options: AnalyzeY
   const markdown = renderBibliographyMarkdown(bibliography);
   const folder = workProductName(transcript.title, now);
   const root = resolve(options.outputRoot ?? process.env.BIBLIOGRAPHY_OUTPUT_ROOT ?? './bibliographies');
-  const outputDirectory = join(root, folder);
-  await mkdir(join(outputDirectory, '.thumbs.db'), { recursive: true });
-  const outputFile = join(outputDirectory, `${folder}.md`);
-  await writeFile(outputFile, markdown, 'utf8');
+  const outputFile = await persistBibliographyMarkdown({ root, folderName: folder, markdown });
   return { outputFile, bibliography };
 }
 

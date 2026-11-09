@@ -14,6 +14,7 @@ node_modules/
 
 # secrets and certificates
 .env
+.env*
 .env.*
 !.env.example
 /certbot-certs/
@@ -34,3 +35,14 @@ test-results/
 # local agent artifacts
 .hermes/cache/
 .hermes/sessions/
+
+# Local credentials and generated development files
+.venv/
+.build/
+.uv-cache/
+.gocache/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.next/
+.gradle/

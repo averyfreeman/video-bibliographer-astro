@@ -45,6 +45,8 @@ export interface BibliographyReference {
   confidence: number;
   /** Original source URL, when identified. */
   sourceUrl: string;
+  /** Evidence state for the source URL; URL syntax alone is never historical verification. */
+  sourceVerification?: 'unverified' | 'reachable' | 'verified';
   /** Short contextual explanation. */
   context: string;
   /** Significance synopsis, limited to two paragraphs. */

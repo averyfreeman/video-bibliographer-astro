@@ -40,6 +40,7 @@ describe('OpenAI bibliography analysis provider', () => {
     const result = await provider.analyzeChunk(request);
 
     expect(result.candidates[0]?.disclaimer).toContain('uncertain');
+    expect(result.candidates[0]?.sourceVerification).toBe('unverified');
     expect(result.notes).toEqual(['Fixture uncertainty']);
     expect(provider.model).toBe('fixture-model');
   });

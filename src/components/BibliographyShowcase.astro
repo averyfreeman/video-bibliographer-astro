@@ -1,0 +1,96 @@
+---
+interface ShowcaseReference {
+  timestamp: string;
+  subject: string;
+  quote: string;
+  confidence: number;
+  sourceUrl: string;
+  sourceVerification: 'unverified' | 'reachable' | 'verified';
+  context: string;
+  significance: string;
+  disclaimer?: string;
+  thumbnail?: {
+    kind: 'archival' | 'source' | 'generated' | 'reconstruction';
+    url?: string;
+    alt: string;
+    provenance: string;
+  };
+}
+
+interface Props {
+  references: ShowcaseReference[];
+}
+
+const { references } = Astro.props;
+const revealEffects = ['rise', 'slide', 'fade'];
+---
+
+<section class="vb-showcase" aria-labelledby="bibliography-timeline-heading">
+  <div class="vb-showcase-timeline">
+    <p class="eyebrow">Timeline first</p>
+    <h2 id="bibliography-timeline-heading">References along the video</h2>
+    <ol class="vb-timeline" aria-label="Historical references in video order">
+      {references.map((reference, index) => (
+        <li class="vb-timeline-item">
+          <a href={`#reference-${index + 1}`}>
+            <time>{reference.timestamp}</time>
+            <span>{reference.subject}</span>
+            <small>{Math.round(reference.confidence * 100)}% confidence</small>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  <div class="vb-citation-list" aria-label="Citation details">
+    {references.map((reference, index) => (
+      <article
+        id={`reference-${index + 1}`}
+        class={`vb-citation-card vb-reveal--${revealEffects[index % revealEffects.length]}`}
+        data-vb-reveal
+      >
+        <div class="vb-citation-heading">
+          <p class="vb-citation-time"><time>{reference.timestamp}</time></p>
+          <h3>{reference.subject}</h3>
+          <span class="vb-confidence" data-confidence={reference.confidence >= 0.75 ? 'high' : 'uncertain'}>
+            {Math.round(reference.confidence * 100)}% confidence
+          </span>
+        </div>
+        <p class="vb-quote">“{reference.quote}”</p>
+        <dl class="vb-citation-facts">
+          <div><dt>Source</dt><dd><a href={reference.sourceUrl} target="_blank" rel="noreferrer">Open original source</a></dd></div>
+          <div><dt>Evidence status</dt><dd>{reference.sourceVerification}</dd></div>
+          <div><dt>Context</dt><dd>{reference.context}</dd></div>
+        </dl>
+        <p>{reference.significance}</p>
+        {reference.disclaimer && <p class="vb-disclaimer"><strong>Uncertainty:</strong> {reference.disclaimer}</p>}
+        {reference.thumbnail ? (
+          <figure class="vb-thumbnail">
+            {reference.thumbnail.url && <img src={reference.thumbnail.url} alt={reference.thumbnail.alt} loading="lazy" />}
+            <figcaption>{reference.thumbnail.kind} image — {reference.thumbnail.provenance}</figcaption>
+          </figure>
+        ) : (
+          <p class="vb-thumbnail-note">Thumbnail: not generated for this fixture; no image is being claimed.</p>
+        )}
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-vb-reveal]')];
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion || !('IntersectionObserver' in window)) {
+    cards.forEach((card) => card.classList.add('is-visible'));
+  } else {
+    document.documentElement.classList.add('vb-reveal-ready');
+    const observer = new IntersectionObserver((entries, currentObserver) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        currentObserver.unobserve(entry.target);
+      });
+    }, { threshold: 0.14 });
+    cards.forEach((card) => observer.observe(card));
+  }
+</script>

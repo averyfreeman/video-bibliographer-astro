@@ -3,9 +3,16 @@ title: Sample Work Product
 description: A clearly labeled example of the intended bibliography output.
 ---
 
+import BibliographyShowcase from '../../../components/BibliographyShowcase.astro';
+
 # Sample Work Product
 
 > **Fixture data:** This page demonstrates the presentation format. It is not the result of analyzing a real YouTube video.
+
+<BibliographyShowcase references={[
+  { timestamp: '00:42', subject: 'A sample historical reference', quote: 'A quoted phrase from the fixture.', confidence: 0.84, sourceUrl: 'https://www.loc.gov/', sourceVerification: 'unverified', context: 'The speaker gestures toward a historical source.', significance: 'This fixture demonstrates a concise significance synopsis while keeping source authenticity explicitly unverified.', disclaimer: 'Fixture data only.' },
+  { timestamp: '02:18', subject: 'A deliberately uncertain candidate', quote: 'A second quoted phrase from the fixture.', confidence: 0.51, sourceUrl: 'https://www.loc.gov/', sourceVerification: 'unverified', context: 'The wording may be an indirect reference.', significance: 'Low-confidence candidates remain visible so a fleeting reference is not silently discarded.', disclaimer: 'Needs independent verification.' }
+]} />
 
 ## Timeline
 
@@ -18,25 +25,6 @@ description: A clearly labeled example of the intended bibliography output.
 }
 "00:42" -> "02:18"
 ```
-
-| Video time | Reference | Confidence |
-| --- | --- | ---: |
-| 00:42 | A sample historical reference | 0.84 |
-| 02:18 | A deliberately uncertain candidate | 0.51 |
-
-## 00:42 — A sample historical reference
-
-**Confidence:** 0.84  
-**Original source:** [Example source](https://www.loc.gov/)
-
-This fixture shows where the quoted wording, source link, context, and concise significance synopsis will appear. A production work product will only call a source verified after checking evidence.
-
-## 02:18 — A deliberately uncertain candidate
-
-**Confidence:** 0.51  
-**Status:** Needs verification
-
-Low-confidence candidates remain visible with an uncertainty note so potential references are not silently discarded. Generated or reconstructed thumbnails will be labeled as illustrative rather than archival evidence.
 
 ## Processing notes
 

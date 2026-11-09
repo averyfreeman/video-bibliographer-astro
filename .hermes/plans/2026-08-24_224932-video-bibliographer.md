@@ -21,7 +21,6 @@
 - First product scope is YouTube URL only. A transcript API is now part of the requested agentic workflow, but pasted transcript textarea support remains deferred and must be recorded in `.hermes/NEXT_STEPS.md`.
 - API key candidates have been discovered by filename only under `$HOME/.secrets/MacClawd/`: Gemini primary/secondary, OpenAI, OpenRouter, and related credentials. Never print their contents, commit them, send them to the browser, or include them in tool output.
 - The requested initial Git repository name is `youtube-video-bibliographer`; use conventional commits and semantic-version tags beginning at `0.1.0` at validated milestones.
-- Render/Jules/GitHub remains a later workflow. Do not read or use the Render key during this OCI-focused phase.
 - The user wants a check-in once the transcript-to-work-product workflow is genuinely working. If an API-key integration blocks progress, break early and notify through the configured Telegram gateway if that outbound channel is available; otherwise report the blocker in this chat without exposing credentials.
 
 ## Non-negotiable security boundary
@@ -241,8 +240,6 @@ Plan updated for the requested dev-first workflow, Gemini-first transcript analy
 The next execution should start with Task 1 and Task 2 locally. Do not contact OCI or attempt deployment until the local dev server and build are working.
 
 Repository target: `youtube-video-bibliographer`.
-
-Deferred future workflow: create a public GitHub repo after secret scanning, enable Jules access, have Jules run unit/Playwright/smoke checks, and have Jules deploy to Render through its MCP connection.
 
 Plan complete and saved. Ready to execute using subagent-driven-development — I’ll dispatch a fresh subagent per task with two-stage review (spec compliance, then code quality) once execution begins.
 

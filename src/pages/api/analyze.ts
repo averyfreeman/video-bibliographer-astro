@@ -2,7 +2,8 @@ import type { APIRoute } from 'astro';
 import type { AnalyzeYouTubeResult } from '../../../scripts/analyze-youtube';
 import { analyzeYouTubeDetailed } from '../../../scripts/analyze-youtube';
 import { AnalysisError } from '../../../src/lib/analysis/errors';
-import { loadOpenAIAnalysisConfig } from '../../../src/lib/analysis/openai';
+import { loadOpenAIAnalysisConfig, type OpenAIEnvironment } from '../../../src/lib/analysis/openai';
+import { BibliographyStorageError } from '../../../src/lib/bibliography/storage';
 import { normalizeYouTubeUrl } from '../../../src/lib/youtube';
 import { YouTubeTranscriptError } from '../../../src/lib/youtube/errors';
 
@@ -32,6 +33,15 @@ interface AnalyzeDependencies {
   env?: NodeJS.ProcessEnv;
 }
 
+function runtimeEnvironment(): OpenAIEnvironment {
+  return {
+    ...process.env,
+    ...(import.meta.env.OPENAI_BASE_URL ? { OPENAI_BASE_URL: import.meta.env.OPENAI_BASE_URL } : {}),
+    ...(import.meta.env.OPENAI_MODEL ? { OPENAI_MODEL: import.meta.env.OPENAI_MODEL } : {}),
+    ...(import.meta.env.OPENAI_API_KEY ? { OPENAI_API_KEY: import.meta.env.OPENAI_API_KEY } : {}),
+  };
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -45,9 +55,9 @@ function safeMarkdownMetadata(outputFile: string): AnalyzeSuccessResponse['markd
 function errorResponse(error: unknown): Response {
   let payload: AnalyzeErrorResponse;
   let statusCode = 500;
-  if (error instanceof YouTubeTranscriptError || error instanceof AnalysisError) {
+  if (error instanceof YouTubeTranscriptError || error instanceof AnalysisError || error instanceof BibliographyStorageError) {
     payload = { status: 'error', code: error.code, message: error.message, retryable: error.retryable };
-    statusCode = error.code === 'invalid-url' ? 400 : error.code === 'missing-key' ? 503 : 502;
+    statusCode = error.code === 'invalid-url' ? 400 : error.code === 'missing-key' ? 503 : error.code === 'output-exists' ? 409 : 502;
   } else {
     payload = { status: 'error', code: 'workflow', message: 'The video could not be processed.', retryable: false };
   }
@@ -102,6 +112,9 @@ export async function handleAnalyzeRequest(request: Request, dependencies: Analy
 }
 
 /** Astro API route for the landing-page analysis form. */
-export const POST: APIRoute = async ({ request }): Promise<Response> => handleAnalyzeRequest(request);
+export const POST: APIRoute = async ({ request }): Promise<Response> => handleAnalyzeRequest(request, {
+  env: runtimeEnvironment(),
+  analyze: (url: string): Promise<AnalyzeYouTubeResult> => analyzeYouTubeDetailed(url, { analysisEnv: runtimeEnvironment() }),
+});
 
 export const prerender = false;

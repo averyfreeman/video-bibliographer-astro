@@ -37,6 +37,16 @@ describe('YouTube URL input', () => {
     expect(form).toContain('method="post"');
     expect(form).toContain("method: 'POST'");
     expect(form).toContain("JSON.stringify({ url: input.value })");
+    expect(form).toContain("const logPrefix = '[Video Bibliographer]'");
+    expect(form).toContain("logStage('submit'");
+    expect(form).toContain("logStage('request-start'");
+    expect(form).toContain("logStage('response-received'");
+    expect(form).toContain("logStage('analysis-complete'");
+    expect(form).toContain("logFailure('analysis-failed'");
+    expect(form).toContain("logFailure('request-failed'");
+    expect(form).not.toContain('console.log(input.value');
+    expect(form).not.toContain('console.log(payload');
+    expect(form).not.toContain('OPENAI_API_KEY');
     expect(form).toContain('Analyze video');
     expect(home).not.toMatch(/Starlight starter|Welcome to your new Astro project|Edit this page/i);
   });

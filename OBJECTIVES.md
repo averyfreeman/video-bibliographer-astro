@@ -54,14 +54,16 @@
 
 - **Status:** IN_PROGRESS
 - **Goal:** Save the exact bibliography output and local thumbnail directory required by `PROJECT_OUTLINE.xml`.
+- **Codex implementation note (2026-08-30):** Added an exclusive persistence seam that creates the matching `.thumbs.db` directory, writes the exact rendered Markdown with `wx`, and fails with a safe conflict instead of overwriting an existing work product. Independent verification remains pending.
 - **Acceptance:** Output folder is `YYYY-MM-DD_HH_MM_SS_<title>` with spaces replaced by underscores and title limited to 32 characters; matching Markdown filename exists; `.thumbs.db` exists; Markdown includes ordered timeline, citation details, source links, context, significance, confidence/disclaimers, and processing notes; existing output is never silently overwritten.
 - **Evidence required:** Filesystem test with fixture and real workflow output inspection.
 - **Milestone:** Tag `0.5.1` only after evidence.
 
 ## Objective 7 — Browser-visible bibliography browsing
 
-- **Status:** NOT_STARTED
+- **Status:** IN_PROGRESS
 - **Goal:** Render a sample and generated work product as a fun, accessible, timeline-first Starlight experience.
+- **Codex implementation note (2026-08-30):** Added the sample route's timeline-first citation showcase with keyboard anchor navigation, confidence/evidence labels, source links, thumbnail provenance/alt handling, and deterministic viewport reveals with reduced-motion fallback. Playwright or equivalent independent browser verification remains pending.
 - **Acceptance:** Timeline appears first; citations are in ascending video order; source links, confidence badges, synopsis limits, image alt text, and reconstruction labels are visible; viewport reveal effects have reduced-motion fallback; D2 is used if compatible, otherwise an accessible typed fallback is present.
 - **Evidence required:** Playwright smoke tests at home and sample bibliography routes, including dark mode and keyboard navigation.
 - **Milestone:** Tag `0.6.0` only after evidence.
@@ -104,9 +106,9 @@
 | 2 | COMPLETE | 2026-08-25 | `http://127.0.0.1:4321/`; `http://127.0.0.1:4321/bibliographies/sample/` | Hermes verified HTTP 200 for home/deep-link routes, rendered branding/form labels and no starter copy, and 14 Vitest tests including copied YouTube URL query-parameter cases, supported host/ID validation, and `0.0.0.0:4321` configuration. Native browser capture was attempted; typed browser setup was unavailable without an explicit driver-owned launch approval, so HTTP plus automated DOM-source checks are the recorded equivalent. |
 | 3 | COMPLETE | 2026-08-25 | `pnpm test` (18 passed); `pnpm check`; `pnpm typecheck`; `pnpm typedoc` | Hermes verified strict Zod contract coverage for confidence/HTTP URLs/timestamps/synopsis/timeline labels/thumbnail metadata, deterministic chronology, Astro diagnostics with 0 errors, and TypeDoc output at `docs/api`. Remaining output is non-blocking dependency/API deprecation hints. |
 | 4 | COMPLETE | 2026-08-25 | `pnpm exec vitest run tests/youtube/provider.test.ts` (11 passed); `pnpm test` (29 passed); `pnpm check`; `pnpm typecheck`; `pnpm typedoc`; `pnpm build`; `pnpm tsx -e` live smoke for `https://www.youtube.com/watch?v=t38LbMVoPCs&t=12s` | Hermes independently verified safe normalization of watch/short/embed/shorts/live URLs and start times; rejection of playlist-only, deceptive-host, credentialed, and custom-port URLs; validated-ID-only provider execution with `--no-playlist` and bounded timeout/metadata/caption sizes; typed private/captionless/rate-limit/timeout/unsupported/empty-track failures; unsafe caption-host rejection; and a real automatic-English transcript containing 3,093 non-empty, finite, nonnegative, monotonic timestamped cues. Provider uses unofficial `yt-dlp`/YouTube caption endpoints and may be blocked or change upstream. Core prototype queued as Kanban card `t_3d443e9f`. |
-| 5 | IN_PROGRESS | — | — | Gemini generation has passed a live CLI smoke test. |
-| 6 | IN_PROGRESS | — | — | Existing output path must be verified against all retention requirements. |
-| 7 | NOT_STARTED | — | — | — |
+| 5 | IN_PROGRESS | — | — | OpenAI-compatible generation and schema validation are implemented. Runtime verification remains blocked by the previously recorded OpenAI `HTTP 429 insufficient_quota` result; no real bibliography output is claimed. |
+| 6 | IN_PROGRESS | 2026-08-30 | `pnpm test` (46 passed); `pnpm check`; `pnpm typecheck`; `pnpm typedoc`; `pnpm build` | Exclusive storage now preserves exact Markdown bytes, creates `.thumbs.db`, and returns a conflict rather than overwriting an existing generated folder. Hermes must independently verify the filesystem behavior and any real workflow output. |
+| 7 | NOT_STARTED | 2026-08-30 | `pnpm test` (46 passed); `pnpm check`; `pnpm build`; sample route `/bibliographies/sample/` generated successfully | Timeline-first showcase implementation is present with reduced-motion handling and explicit fixture thumbnail non-claim. Hermes must independently verify the rendered browser surface, keyboard navigation, responsive behavior, dark mode, and reduced-motion behavior before changing status. |
 | 8 | NOT_STARTED | — | — | — |
 | 9 | NOT_STARTED | — | — | — |
 | 10 | NOT_STARTED | — | — | — |
